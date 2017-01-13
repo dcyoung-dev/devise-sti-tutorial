@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DeviseStiStripeConnect</title>
+    <%= csrf_meta_tags %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+  	<nav>
+  		Navigation
+      <%= link_to Dashboard, dashboard_root_path %>
+      <% if student_signed_in? %>
+        <%= link_to 'Log out', destroy_student_session_path, method: :delete %>
+      <% end %>
+      <% if teacher_signed_in? %>
+        <%= link_to 'Log out', destroy_teacher_session_path, method: :delete %>
+      <% end %>
+  	</nav>
+  	
+  	<p class="notice"><%= notice %></p>
+    <p class="alert"><%= alert %></p>
+    <hr>
+    <%= yield %>
+  </body>
+</html>
