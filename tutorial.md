@@ -1,10 +1,10 @@
-# Tutorial
-
-## What
+![Single Table Inheritance (STI) with Devise - Tutorial](https://vsmedia.co.uk/wp-content/uploads/2017/01/Single-Table-Inheritance-STI-with-Devise.png)
+# What
 In this tutorial we are going to walk through building a Rails application using Devise for authentication. We will create a `User` model and an area that can only be accessed by a `User`.
 We're then going to explore the use of Single Table Inheritance (STI) with Devise, to create a `Student` and a `Teacher` model, both of which will have customised information on the dashboard as well as different views when signing up or editing their accounts.
 
-## Setup
+# Setup
+
 First of all we'll start by creating a new Rails app with no test unit. In the terminal run
 
 ```sh
@@ -13,7 +13,7 @@ $ rails new devise-sti-stripe-connect -T
 ```
 We will not change any of the defaults here, as a result this app will be very simple.
 
-### Add Devise
+## Add Devise
 Once we have our Rails app installed we'll edit the Gemfile to add devise.
 
 ```ruby
@@ -52,7 +52,7 @@ Finally, run to generate all the views that devise requires.
 $ rails g devise:views
 ```
 
-### Static Pages
+## Static Pages
 To add a little extra to our application we can generate a simple static page controller with an index method and view that we will access with no authentication.
 
 ```sh
@@ -67,7 +67,7 @@ We will also set the root of the site to show the static `pages/index`
 root to: "pages#index"
 ```
 
-### Dashboard
+## Dashboard
 We can now create our dashboard that will only be available to our users.
 
 ```sh
@@ -80,13 +80,13 @@ In addition to the controller and views that have generated, we can add `root to
 ```ruby
 # config/routes.rb
 namespace :dashboard do
-	root to: "dashboard#index"
+    root to: "dashboard#index"
 end
 ```
 
 As a result of getting our dashboard views and routes set up, we're ready to add our first devise model.
 
-### Devise Models
+## Devise Models
 Start with User (base user model) model. This will be the model that all other user types will inherit from and the only model that will have a database table. As well as the default devise properties we also want to add a `name` property for every user.
 
 ```sh
@@ -99,11 +99,11 @@ In our application layout we'll add a link for our users to log out - we probabl
 ```html
 # app/views/layouts/application.html.erb
 <nav>
-	Navigation
-	<%= link_to Dashboard, dashboard_root_path %>
-	<% if user_signed_in? %>
-		<%= link_to 'Log out', destroy_user_session_path, method: :delete %>
-	<% end %>
+    Navigation
+    <%= link_to Dashboard, dashboard_root_path %>
+    <% if user_signed_in? %>
+        <%= link_to 'Log out', destroy_user_session_path, method: :delete %>
+    <% end %>
 </nav>
 ```
 
@@ -131,12 +131,12 @@ $ rails server
 By visit `localhost:3000/dashboard` in our browser you will be redirected to the sign in screen. We have no users yet so you can click the sign up link and register a new user.
 As a result we now have an account that can view the dashboard. Now before going any further we must make sure that we have logged out of our application.
 
-## Single Table Inheritance with Devise
+# Single Table Inheritance with Devise
 Seems like we now have a basic functioning application where users can sign up and sign in, and only registered users can view a dashboard page.
 What if we needed to have different kinds of users that had the same/similar attributes but possibly viewed different items or had different actions that could be taken?
 Well we could set up two separate devise models but that seems overkill. Instead we will add two new models which will both inherit from the existing User model, this is called Single Table Inheritance. This way we can write all the shared operations of a user in one place and add custom methods to the seperate models where needed.
 
-### Creating New Models
+## Creating New Models
 We'll start off by making sure that we have logged out of our application and then we will destroy all Users from the Rails console.
 
 ```sh
@@ -164,7 +164,7 @@ $ rails g migration AddTypeToUsers type:string
 $ rails db:migrate
 ```
 
-### Modifying Models, Views, Controllers and Routes
+## Modifying Models, Views, Controllers and Routes
 We now have to modify a our newly created models, our routes for devise, our application layout and our application controller.
 Let's start by changing our models. These have to be changed because they currently inherit from `ApplicationRecord` but as these will be users we need to inherit from - you guessed it - `User`.
 
@@ -194,13 +194,13 @@ Our `<nav>` section within the applications layout will have to be changed since
 ```html
 # app/views/layouts/application.html.erb
 <nav>
-	Navigation
-	<% if student_signed_in? %>
-		<%= link_to 'Log out', destroy_student_session_path, method: :delete %>
-	<% end %>
-	<% if teacher_signed_in? %>
-		<%= link_to 'Log out', destroy_teacher_session_path, method: :delete %>
-	<% end %>
+    Navigation
+    <% if student_signed_in? %>
+        <%= link_to 'Log out', destroy_student_session_path, method: :delete %>
+    <% end %>
+    <% if teacher_signed_in? %>
+        <%= link_to 'Log out', destroy_teacher_session_path, method: :delete %>
+    <% end %>
 </nav>
 ```
 
@@ -216,7 +216,7 @@ The order of the `contains:` array is important. Devise will use the first model
 To test out what we have now visit `/students/sign_up` and sign up using a dummy email address like `student@example.com`. Once signed up and logged in, log back out.
 Now if you visit `/teachers/sign_in` and try to use the email and password that you used to sign up as a `Student` you'll find that they won't work. Visit `/teacher/sign_up` and register using `teacher@example.com`
 
-### Different Dashboard Displays
+## Different Dashboard Displays
 Now that we have two accounts, one `Student` and one `Teacher`. Either of these accounts can be logged in to view the `/dashboard`.
 
 To change what a user can see on their dashboard depending on what model they belong to we can use the following:
@@ -224,11 +224,11 @@ To change what a user can see on their dashboard depending on what model they be
 ```html
 # app/views/dashboard/index.html.erb
 <% if student_signed_in? %>
-	<p>I'm a Student</p>
+    <p>I'm a Student</p>
 <% end %>
 
 <% if teacher_signed_in? %>
-	<p>I'm a Teacher</p>
+    <p>I'm a Teacher</p>
 <% end %>
 ```
 
@@ -237,15 +237,15 @@ Now we have custom content for each user type. We can also lock down routes usin
 ```ruby
 # config/routes.rb
 namespace :dashboard do
-	authenticated :student do
-		resources :subjects, module: "student", :only => [:show, :index]
-	end
+    authenticated :student do
+        resources :subjects, module: "student", :only => [:show, :index]
+    end
 
-	authenticated :teacher do
-		resources :subjects, module: "teacher"
-	end
+    authenticated :teacher do
+        resources :subjects, module: "teacher"
+    end
 
-	root to: "dashboard#index"
+    root to: "dashboard#index"
 end
 ```
 
@@ -275,7 +275,7 @@ edit_dashboard_subject GET    /dashboard/subjects/:id/edit(.:format) dashboard/t
 
 Two further controllers would be needed for this set up `Dashboard::Student::Subjects` containing `before_action :authenticate_student!` and `Dashboard::Student::Subjects` containing `before_action :authenticate_teacher!`.
 
-## Custom Devise Views
+# Custom Devise Views
 Say, for whatever reason, you want to have different views for a Student or and Teacher when they sign up. This can be easily added to the Devise configuration.
 
 ```ruby
@@ -297,8 +297,8 @@ In both our new and edit registrations views we'll add the text field for the na
 <!-- # and in app/views/students/registrations/edit.html.erb -->
 
 <div class="field">
-	<%= f.label :name %><br />
-	<%= f.text_field :name, autofocus: true %>
+    <%= f.label :name %><br />
+    <%= f.text_field :name, autofocus: true %>
 </div>
 ```
 
@@ -312,13 +312,13 @@ For devise to accept the incoming `name` param we'll have to add permitted param
 before_action :configure_permitted_parameters, if: :devise_controller?
 
 private
-	def configure_permitted_parameters
-		added_attrs = [:email, :password, :password_confirmation, :remember_me, :name]
-		devise_parameter_sanitizer.permit :sign_up, keys: added_attrs
-		devise_parameter_sanitizer.permit :account_update, keys: added_attrs
-	end
+    def configure_permitted_parameters
+        added_attrs = [:email, :password, :password_confirmation, :remember_me, :name]
+        devise_parameter_sanitizer.permit :sign_up, keys: added_attrs
+        devise_parameter_sanitizer.permit :account_update, keys: added_attrs
+    end
 ```
 
-## Conclusion
+# Conclusion
 In conclusion, the implementation of Single Table Inheritance with Devise is fairly straightforward in this scenario. This is not, by any means, a tried and tested method of implementing STI with Devise, but is more an introduction as to how it may be used.
 You can access this application code on [GitHub](https://github.com/VSM-Dave/devise-sti-tutorial).
